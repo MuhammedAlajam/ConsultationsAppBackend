@@ -12,4 +12,8 @@ class Expert extends Model
     {
         return $this->belongsTo(User::class, 'id');
     }
+    public function consultations()
+    {
+        return $this->belongsToMany(Consultation::class, 'consultation_expert', 'consultation_id', 'expert_id');
+    }
 }

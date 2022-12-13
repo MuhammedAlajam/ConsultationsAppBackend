@@ -13,4 +13,11 @@ class User extends Model
     {
         return $this->hasOne(Expert::class, 'id');
     }
+
+    /*
+    public function favourites()
+    {
+        return $this->belongsToMany(User::class, 'user_user', 'user_id', 'user_id');
+    }
+    */
 }
