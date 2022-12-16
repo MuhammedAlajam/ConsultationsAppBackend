@@ -13,15 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('experts', function (Blueprint $table) {
+        Schema::create('favorites', function (Blueprint $table) {
             $table->id();
-
-            $table->text('booked_times')->nullable();
-            $table->decimal('sum_of_ratings')->default('0');
-            $table->decimal('number_of_ratings')->default('0');
-            $table->integer('session_duration');
-            $table->decimal('fee');
-            $table->text('description');
+            $table->integer('user_id');
+            $table->integer('fav_id');
         });
     }
 
@@ -32,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('experts');
+        Schema::dropIfExists('favorites');
     }
 };

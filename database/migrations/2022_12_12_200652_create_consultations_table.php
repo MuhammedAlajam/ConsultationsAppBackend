@@ -26,6 +26,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('consultations');
+        // !! !! Be carefull, down hinted!! !!
+        // Schema::dropIfExists('consultations');
     }
 };

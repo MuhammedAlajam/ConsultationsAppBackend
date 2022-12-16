@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->integer('consultation_id');
             $table->integer('expert_id');
-            $table->timestamps();
         });
     }
 

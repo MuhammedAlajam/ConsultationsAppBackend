@@ -16,16 +16,16 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-
             $table->string('first_name');
-            $table->string('second_name');
-
+            $table->string('last_name');
             $table->string('profile_photo');
             $table->string('phone_number');
-            $table->string('address');
-            $table->decimal('wallet');
+            $table->string('country');
+            $table->string('city');
+            $table->decimal('wallet')->default(0);
+            $table->text('password');
 
-            $table->foreignId('expert_id');
+            $table->foreignId('expert_id')->nullable();
         });
     }
 

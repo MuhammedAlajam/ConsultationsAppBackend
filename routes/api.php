@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ExpertController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Whoops\Run;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +17,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
+Route::post('users/register', [UserController::class, 'register']);
+Route::post('experts/register', [ExpertController::class, 'register']);
+
+Route::put('experts/rate/{id}', [ExpertController::class, 'rate']);
+Route::put('users/transfair', [UserController::class, 'transfairMoney']);
+
+Route::get('users/favorites/{id}', [UserController::class, 'favorites']);
+Route::put('users/addFavorite', [UserController::class,  'addFavorite']);
+
+Route::get('experts/all', [ExpertController::class, 'showAll']);
+Route::get('experts/searchByName/{name}', [ExpertController::class, 'searchByName']);
+Route::get('experts/searchByConsultation/{name}', [ExpertController::class, 'searchByConsultation']);
+Route::get('experts/getBookedTimes/{id}', [ExpertController::class, 'getBookedTimes']);
