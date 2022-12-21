@@ -28,18 +28,19 @@ class ExpertController extends Controller
      */
     public function register(Request $request)
     {
-        $expertInfo = Expert::create([
-            'description' => $request->input('description'),
-            'session_duration' => $request->input('session_duration'),
-            'fee' => $request->input('fee'),
+        $request->validate([
+            'name'=>'required',
+            'password'=>'required|min:8',
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'country'=>'required',
+            'city'=>'required',
+            'phone_number'=>'required',
+            'description'=>'required',
+            'session_duration'=>'required',
+            'fee'=>'required'
         ]);
-
-        $ids = json_decode($request->input('consultatinosIds'));
-
-        foreach ($ids as $id)
-            Consultation::find($id)->experts()->attach($expertInfo->id);
-
-        return User::create([
+        $user=User::create([
             'name' => $request->input('name'),
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
@@ -48,10 +49,35 @@ class ExpertController extends Controller
             'country' => $request->input('country'),
             'city' => $request->input('city'),
             'wallet' => $request->input('wallet'),
-            'password' => $request->input('password'),
-            'expert_id' => $expertInfo->id,
+            'password' => bcrypt($request->input('password')),
+            'role_type' =>'expert'
         ]);
+        $expertInfo = Expert::create([
+            'description' => $request->input('description'),
+            'session_duration' => $request->input('session_duration'),
+            'fee' => $request->input('fee'),
+            'user_id'=>$user->id
+        ]);
+        
+               
+        //$ids = json_decode($request->input('consultatinosIds'));
+
+        //foreach ($ids as $id)
+           //s Consultation::find($id)->experts()->attach($expertInfo->id);
+
+        $consultation_types = json_decode($request->input('consultationIds'));
+
+        foreach($consultation_types as $consultation_type)
+        {
+            $expertInfo->consultations()->attach($consultation_type);
+        }
+        return response()->json([
+            'user'=>$user,
+            'token'=>$user->createToken($user->name)->plainTextToken
+        ],200);
     }
+
+   
 
     /**
      * Display the specified resource.
@@ -61,22 +87,31 @@ class ExpertController extends Controller
      */
     public function showAll()
     {
-        return User::all()->where('expert_id');
+        $experts= User::all()->where('role_type','expert');
+        
+        return response()->json($experts,200);
     }
 
+    public function show($id)
+    {
+        $expert= User::all()->where('id',$id)->first();
+        return response()->json($expert,200);
+    }
 
     public function searchByName($name)
     {
-        return User::all()->where('name', $name)->where('expert_id', '!=', null);
+        $users= User::all()->where('name', $name)->where('role_type','expert');
+
+        return response()->json($users,200);
     }
 
     public function searchByConsultation($name)
     {
-        $response = [];
+        $experts ;
         foreach (Consultation::where('name', $name)->first()->experts as $ex)
-            $response[] = $ex->user;
+            $experts[] = $ex->user;
 
-        return $response;
+        return response()->json($experts,200);
     }
 
 
@@ -98,7 +133,7 @@ class ExpertController extends Controller
         $user->expert->sum_of_ratings += $request->input('rate');
         $user->expert->save();
 
-        return $user->expert;
+        return response()->json($user,200);
     }
 
     /**

@@ -7,20 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Model
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Auth\Authenticatable as AuthenticableTrait;
+
+
+class User extends Model implements Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable,AuthenticableTrait;
 
     public $timestamps = false;
     protected $guarded = [];
 
     public function expert()
     {
-        return $this->hasOne(Expert::class, 'id', 'expert_id');
+        return $this->hasOne(Expert::class);
     }
-
     public function favorites()
     {
-        return $this->belongsToMany(User::class, 'favorites',  'user_id', 'fav_id');
+        return $this->hasMany(Favorite::class);
     }
 }

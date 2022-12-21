@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('favorites', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('fav_id');
+            $table->foreignId('user_id')->constrained();
+            $table->unsignedBigInteger('fav_id');
         });
     }
 

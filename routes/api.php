@@ -17,17 +17,24 @@ use Whoops\Run;
 |
 */
 
-
+// Public Routes
 Route::post('users/register', [UserController::class, 'register']);
 Route::post('experts/register', [ExpertController::class, 'register']);
+Route::post('login',[UserController::class,'login']);
 
-Route::put('experts/rate/{id}', [ExpertController::class, 'rate']);
-Route::put('users/transfair', [UserController::class, 'transfairMoney']);
+//Protected Routes
 
-Route::get('users/favorites/{id}', [UserController::class, 'favorites']);
-Route::put('users/addFavorite', [UserController::class,  'addFavorite']);
+Route::group(['middleware'=>['auth:sanctum']],function () {
 
-Route::get('experts/all', [ExpertController::class, 'showAll']);
-Route::get('experts/searchByName/{name}', [ExpertController::class, 'searchByName']);
-Route::get('experts/searchByConsultation/{name}', [ExpertController::class, 'searchByConsultation']);
-Route::get('experts/getBookedTimes/{id}', [ExpertController::class, 'getBookedTimes']);
+    Route::put('experts/rate/{id}', [ExpertController::class, 'rate']);
+    Route::put('users/transfair', [UserController::class, 'transfairMoney']);
+    
+    Route::get('users/favorites/{id}', [UserController::class, 'favorites']);
+    Route::post('users/addFavorite', [UserController::class,  'addFavorite']);
+    
+    Route::get('experts/all', [ExpertController::class, 'showAll']);
+    Route::get('experts/show/{id}',[ExpertController::class,'show']);
+    Route::get('experts/searchByName/{name}', [ExpertController::class, 'searchByName']);
+    Route::get('experts/searchByConsultation/{name}', [ExpertController::class, 'searchByConsultation']);
+    Route::get('experts/getBookedTimes/{id}', [ExpertController::class, 'getBookedTimes']);
+});

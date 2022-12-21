@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('session_duration');
             $table->decimal('fee');
             $table->text('description');
+            $table->foreignId('user_id')->constrained();
         });
     }
 
