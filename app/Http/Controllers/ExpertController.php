@@ -8,6 +8,7 @@ use App\Models\Expert;
 use App\Models\User;
 use Psy\Command\WhereamiCommand;
 use Illuminate\Support\Str;
+
 class ExpertController extends Controller
 {
     /**
@@ -29,74 +30,73 @@ class ExpertController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'username'=>'required|unique:users,username',
-            'password'=>'required|min:8',
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'country'=>'required',
-            'city'=>'required',
-            'phone_number'=>'required|unique:users,phone_number',
-            'description'=>'required',
-            'hourly_rate'=>'required'
+            'username' => 'required|unique:users,username',
+            'password' => 'required|min:8',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'country' => 'required',
+            'city' => 'required',
+            'phone_number' => 'required|unique:users,phone_number',
+            'description' => 'required',
+            'hourly_rate' => 'required'
         ]);
-        $user=User::create([
+        $user = User::create([
             'username' => $request->input('username'),
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
-            'profile_photo' => $request->input('profile_photo'),
+            'profile_photo' => 'path',
             'phone_number' => $request->input('phone_number'),
             'country' => $request->input('country'),
             'city' => $request->input('city'),
             'wallet' => $request->input('wallet'),
             'password' => bcrypt($request->input('password')),
-            'role_type' =>'expert'
+            'role_type' => 'expert'
         ]);
         $expert = Expert::create([
             'description' => $request->input('description'),
             'hourly_rate' => $request->input('hourly_rate'),
-            'user_id'=>$user->id
+            'user_id' => $user->id
         ]);
-        
-        
-        
+
+
+
         //$ids = json_decode($request->input('consultatinosIds'));
-        
+
         //foreach ($ids as $id)
         //s Consultation::find($id)->experts()->attach($expertInfo->id);
-        
+
         $consultation_types = json_decode($request->input('consultationsNames'));
-        
-        foreach($consultation_types as $consultation_type)
-        {
-            $new_consultation = Consultation::all()->where('name',$consultation_type);
-            if( $new_consultation->isEmpty() )
-            {
+
+        foreach ($consultation_types as $consultation_type) {
+            $new_consultation = Consultation::all()->where('name', $consultation_type);
+            if ($new_consultation->isEmpty()) {
                 Consultation::create([
-                    'name'=>$consultation_type
+                    'name' => $consultation_type
                 ]);
             }
-            
-            $expert->consultations()->attach(Consultation::where('name',$consultation_type)->get('id'));
-        }
-        $expert=User::where('username',$request->username)->first();
 
-         $user_response=[
-        'id'=>$expert->id,
-        'username'=>$expert->username,
-        'first_name'=>$expert->first_name,
-        'last_name'=>$expert->last_name,
-        'country'=>$expert->country,
-        'city'=>$expert->city,
-        'phone_number'=>$expert->phone_number,
-        'wallet'=>$expert->wallet,
-        'description'=>$expert->expert->description,
-        'rate'=>$expert->expert->rate,
-        'hourly_rate'=>$expert->expert->hourly_rate
+            $expert->consultations()->attach(Consultation::where('name', $consultation_type)->get('id'));
+        }
+        $expert = User::where('username', $request->username)->first();
+
+        $user_response = [
+            'id' => $expert->id,
+            'username' => $expert->username,
+            'first_name' => $expert->first_name,
+            'last_name' => $expert->last_name,
+            'country' => $expert->country,
+            'city' => $expert->city,
+            'phone_number' => $expert->phone_number,
+            'wallet' => $expert->wallet,
+            'description' => $expert->expert->description,
+            'rate' => $expert->expert->rate,
+            'hourly_rate' => $expert->expert->hourly_rate,
+            'role_type' => 'expert',
         ];
         return response()->json([
-            'user'=>$user_response,
-            'token'=>$user->createToken($user->username)->plainTextToken
-        ],200);
+            'user' => $user_response,
+            'token' => $user->createToken($user->username)->plainTextToken
+        ], 200);
     }
     /**
      * Display the specified resource.
@@ -106,74 +106,70 @@ class ExpertController extends Controller
      */
     public function showAll()
     {
-        $experts=[];
-        foreach(Expert::all() as $expert)
-        {
-            $experts[]=[
-                'id'=>$expert->user->id,
-                'username'=>$expert->user->username,
-                'first_name'=>$expert->user->first_name,
-                'last_name'=>$expert->user->last_name,
-                'rate'=>$expert->rate,
-                'hourly_rate'=>$expert->hourly_rate
+        $experts = [];
+        foreach (Expert::all() as $expert) {
+            $experts[] = [
+                'id' => $expert->user->id,
+                'username' => $expert->user->username,
+                'first_name' => $expert->user->first_name,
+                'last_name' => $expert->user->last_name,
+                'rate' => $expert->rate,
+                'hourly_rate' => $expert->hourly_rate
 
             ];
         }
-        return response()->json($experts,200);
+        return response()->json($experts, 200);
     }
 
     public function show($id)
     {
-        $user= User::where('id',$id)->get()->first();
+        $user = User::where('id', $id)->get()->first();
         $expert = [
-            'id'=>$user->id,
-            'username'=>$user->username,
-            'first_name'=>$user->first_name,
-            'last_name'=>$user->last_name,
-            'country'=>$user->country,
-            'city'=>$user->city,
-            'phone_number'=>$user->phone_number,
-            'description'=>$user->expert->description,
-            'hourly_rate'=>$user->expert->hourly_rate,
-            'rate'=>$user->expert->rate
-            
+            'id' => $user->id,
+            'username' => $user->username,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'country' => $user->country,
+            'city' => $user->city,
+            'phone_number' => $user->phone_number,
+            'description' => $user->expert->description,
+            'hourly_rate' => $user->expert->hourly_rate,
+            'rate' => $user->expert->rate
+
         ];
-        return response()->json($expert,200);
+        return response()->json($expert, 200);
     }
 
     public function searchByName($name)
     {
-        $users=[];
-        foreach(User::where('role_type','expert')->get() as $expert)
-        {
-            if(Str::contains($expert->username,$name)||Str::contains($expert->first_name,$name)||Str::contains($expert->last_name,$name))
-            {
-                $ex=$expert;
-                $users[]=[
-                    'id'=>$expert->id,
-                    'username'=>$expert->username,
-                    'first_name'=>$expert->first_name,
-                    'last_name'=>$expert->last_name,
-                    'rate'=>$expert->expert->rate,
-                    'hourly_rate'=>$expert->expert->hourly_rate
+        $users = [];
+        foreach (User::where('role_type', 'expert')->get() as $expert) {
+            if (Str::contains($expert->username, $name) || Str::contains($expert->first_name, $name) || Str::contains($expert->last_name, $name)) {
+                $ex = $expert;
+                $users[] = [
+                    'id' => $expert->id,
+                    'username' => $expert->username,
+                    'first_name' => $expert->first_name,
+                    'last_name' => $expert->last_name,
+                    'rate' => $expert->expert->rate,
+                    'hourly_rate' => $expert->expert->hourly_rate
                 ];
             }
         }
-        return response()->json($users,200);
+        return response()->json($users, 200);
     }
 
     public function searchByConsultation($id)
     {
-        $experts =[] ;
-        $consultation_type =[] ;
-        if( !Consultation::all()->where('id',$id)->isEmpty() )
-        {
-            $consultation_type = Consultation::where('id',$id)->first()->experts;
+        $experts = [];
+        $consultation_type = [];
+        if (!Consultation::all()->where('id', $id)->isEmpty()) {
+            $consultation_type = Consultation::where('id', $id)->first()->experts;
         }
         foreach ($consultation_type as $ex)
             $experts[] = $ex->user;
 
-        return response()->json($experts,200);
+        return response()->json($experts, 200);
     }
 
 
@@ -193,10 +189,10 @@ class ExpertController extends Controller
         $user = User::find($id);
         $user->expert->number_of_ratings++;
         $user->expert->sum_of_ratings += $request->input('rate');
-        $user->expert->rate=$user->expert->sum_of_ratings/$user->expert->number_of_ratings;
+        $user->expert->rate = $user->expert->sum_of_ratings / $user->expert->number_of_ratings;
         $user->expert->save();
 
-        return response()->json([],200);
+        return response()->json([], 200);
     }
 
     /**

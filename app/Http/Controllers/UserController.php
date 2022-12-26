@@ -35,7 +35,7 @@ class UserController extends Controller
             'username' => $request->input('username'),
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
-            'profile_photo' => $request->input('profile_photo'),
+            'profile_photo' => 'path',
             'phone_number' => $request->input('phone_number'),
             'country' => $request->input('country'),
             'city' => $request->input('city'),
@@ -51,7 +51,8 @@ class UserController extends Controller
             'country',
             'city',
             'phone_number',
-            'wallet'
+            'wallet',
+            'role_type',
         ])->first();
         return response()->json([
             'user' => $user,
@@ -81,7 +82,8 @@ class UserController extends Controller
             'country',
             'city',
             'phone_number',
-            'wallet'
+            'wallet',
+            'role_type',
         ])->first();
 
         if ($user->role_type != 'user') {
@@ -97,7 +99,8 @@ class UserController extends Controller
                 'wallet' => $expert->wallet,
                 'description' => $expert->expert->description,
                 'rate' => $expert->expert->rate,
-                'hourly_rate' => $expert->expert->hourly_rate
+                'hourly_rate' => $expert->expert->hourly_rate,
+                'role_type' => 'expert',
             ];
         }
 
