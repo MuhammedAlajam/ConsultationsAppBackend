@@ -57,14 +57,15 @@ class ExpertController extends Controller
             'user_id'=>$user->id
         ]);
         
-               
+        
+        
         //$ids = json_decode($request->input('consultatinosIds'));
-
+        
         //foreach ($ids as $id)
-           //s Consultation::find($id)->experts()->attach($expertInfo->id);
-
+        //s Consultation::find($id)->experts()->attach($expertInfo->id);
+        
         $consultation_types = json_decode($request->input('consultationsNames'));
-
+        
         foreach($consultation_types as $consultation_type)
         {
             $new_consultation = Consultation::all()->where('name',$consultation_type);
@@ -74,11 +75,26 @@ class ExpertController extends Controller
                     'name'=>$consultation_type
                 ]);
             }
-
+            
             $expert->consultations()->attach(Consultation::where('name',$consultation_type)->get('id'));
         }
+        $expert=User::where('username',$request->username)->first();
+
+         $user_response=[
+        'id'=>$expert->id,
+        'username'=>$expert->username,
+        'first_name'=>$expert->first_name,
+        'last_name'=>$expert->last_name,
+        'country'=>$expert->country,
+        'city'=>$expert->city,
+        'phone_number'=>$expert->phone_number,
+        'wallet'=>$expert->wallet,
+        'description'=>$expert->expert->description,
+        'rate'=>$expert->expert->rate,
+        'hourly_rate'=>$expert->expert->hourly_rate
+        ];
         return response()->json([
-            'user'=>$user,
+            'user'=>$user_response,
             'token'=>$user->createToken($user->username)->plainTextToken
         ],200);
     }

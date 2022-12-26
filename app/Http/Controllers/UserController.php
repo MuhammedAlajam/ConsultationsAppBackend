@@ -31,7 +31,7 @@ class UserController extends Controller
             'city'=>'required',
             'phone_number'=>'required|unique:users,phone_number'
         ]);
-        $user=User::create([
+        User::create([
             'username' => $request->input('username'),
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
@@ -43,6 +43,16 @@ class UserController extends Controller
             'password' =>bcrypt($request->input('password')),
             'role_type' =>'user'
         ]);
+        $user=User::where('username',$request->username)->get([
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'country',
+            'city',
+            'phone_number',
+            'wallet'
+        ])->first();
         return response()->json([
             'user'=>$user,
             'token'=>$user->createToken($user->username)->plainTextToken
@@ -64,9 +74,40 @@ class UserController extends Controller
             ],403);
         }
         $user=User::where('username',$request->username)->first();
-
+        $user_response;
+        if($user->role_type=='user')
+        {
+            $user_response=User::where('username',$request->username)->get([
+                'id',
+                'username',
+                'first_name',
+                'last_name',
+                'country',
+                'city',
+                'phone_number',
+                'wallet'
+            ])->first();
+        }
+        else
+        {
+            $expert=User::where('username',$request->username)->first();
+            $user_response=[
+                'id'=>$expert->id,
+                'username'=>$expert->username,
+                'first_name'=>$expert->first_name,
+                'last_name'=>$expert->last_name,
+                'country'=>$expert->country,
+                'city'=>$expert->city,
+                'phone_number'=>$expert->phone_number,
+                'wallet'=>$expert->wallet,
+                'description'=>$expert->expert->description,
+                'rate'=>$expert->expert->rate,
+                'hourly_rate'=>$expert->expert->hourly_rate
+            ];
+        }
+        
         return response()->json([
-            'user'=>$user,
+            'user'=>$user_response,
             'token'=>$user->createToken($user->username)->plainTextToken
         ],200);
     }
@@ -97,7 +138,6 @@ class UserController extends Controller
                 'last_name'=>$expert_fav->last_name,
                 'rate'=>$expert_fav->expert->rate,
                 'hourly_rate'=>$expert_fav->expert->hourly_rate
-
             ];
         }
         return response()->json($experts,200);
