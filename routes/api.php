@@ -29,12 +29,12 @@ Route::group(['middleware'=>['auth:sanctum']],function () {
     Route::put('experts/rate/{id}', [ExpertController::class, 'rate']);
     Route::put('users/transfair', [UserController::class, 'transfairMoney']);
     
-    Route::get('users/favorites/{id}', [UserController::class, 'favorites']);
+    Route::get('favorites', [UserController::class, 'favorites']);
     Route::post('users/addFavorite', [UserController::class,  'addFavorite']);
     
     Route::get('experts/all', [ExpertController::class, 'showAll']);
     Route::get('experts/show/{id}',[ExpertController::class,'show']);
-    Route::get('experts/searchByName/{name}', [ExpertController::class, 'searchByName']);
-    Route::get('experts/searchByConsultation/{name}', [ExpertController::class, 'searchByConsultation']);
+    Route::get('experts/search/{name}', [ExpertController::class, 'searchByName']);
+    Route::get('experts/searchByConsultation/{id}', [ExpertController::class, 'searchByConsultation']);
     Route::get('experts/getBookedTimes/{id}', [ExpertController::class, 'getBookedTimes']);
 });

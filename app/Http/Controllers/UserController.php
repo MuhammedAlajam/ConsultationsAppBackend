@@ -23,16 +23,16 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'=>'required',
+            'username'=>'required|unique:users,username',
             'password'=>'required',
             'first_name'=>'required',
             'last_name'=>'required',
             'country'=>'required',
             'city'=>'required',
-            'phone_number'=>'required'
+            'phone_number'=>'required|unique:users,phone_number'
         ]);
         $user=User::create([
-            'name' => $request->input('name'),
+            'username' => $request->input('username'),
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
             'profile_photo' => $request->input('profile_photo'),
@@ -45,7 +45,7 @@ class UserController extends Controller
         ]);
         return response()->json([
             'user'=>$user,
-            'token'=>$user->createToken($user->name)->plainTextToken
+            'token'=>$user->createToken($user->username)->plainTextToken
         ],200);
     }
 
@@ -53,21 +53,21 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'name'=>'required',
+            'username'=>'required',
             'password'=>'required|min:8'
         ]);
-        if(!Auth::attempt($request->only('name','password')))
+        if(!Auth::attempt($request->only('username','password')))
         {
             return response()->json([
-                'userInfo'=>'',
+                'user'=>'',
                 'token'=>''
             ],403);
         }
-        $userInfo=User::where('name',$request->name)->first();
+        $user=User::where('username',$request->username)->first();
 
         return response()->json([
-            'userInfo'=>$userInfo,
-            'token'=>$userInfo->createToken($userInfo->name)->plainTextToken
+            'user'=>$user,
+            'token'=>$user->createToken($user->username)->plainTextToken
         ],200);
     }
     /**
@@ -82,16 +82,24 @@ class UserController extends Controller
         return response()->json($user,200);
     }
 
-    public function favorites($id)
+    public function favorites()
     {
+        $id = Auth::user()->id;
         $experts_ids = User::find($id)->favorites;
-        $experts;
-
-        foreach ($experts_ids as $expert_id)
+        $experts=[];
+        foreach($experts_ids as $expert)
         {
-            $experts= User::find($expert_id);
-        }
+            $expert_fav= User::find($expert->fav_id);
+            $experts[]=[
+                'id'=>$expert_fav->id,
+                'username'=>$expert_fav->username,
+                'first_name'=>$expert_fav->first_name,
+                'last_name'=>$expert_fav->last_name,
+                'rate'=>$expert_fav->expert->rate,
+                'hourly_rate'=>$expert_fav->expert->hourly_rate
 
+            ];
+        }
         return response()->json($experts,200);
     }
     /**
@@ -112,10 +120,7 @@ class UserController extends Controller
         $first->save();
         $second->save();
 
-        return response()->json([
-            'user wallet is now : ' => $first->wallet,
-            'expert wallet is now : ' => $second->wallet,
-        ],200);
+        return response()->json([],200);
     }
 
     public function addFavorite(Request $request)
@@ -125,7 +130,7 @@ class UserController extends Controller
             'user_id'=>$request->input('user_id'),
             'fav_id'=>$request->input('fav_id')
         ]);
-        return response()->json($favorite,200);
+        return response()->json([],200);
     }
 
     /**

@@ -19,8 +19,8 @@ return new class extends Migration
             $table->text('booked_times')->nullable();
             $table->decimal('sum_of_ratings')->default('0');
             $table->decimal('number_of_ratings')->default('0');
-            $table->integer('session_duration');
-            $table->decimal('fee');
+            $table->decimal('rate')->default('0');
+            $table->decimal('hourly_rate');
             $table->text('description');
             $table->foreignId('user_id')->constrained();
         });
