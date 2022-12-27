@@ -9,6 +9,8 @@ use App\Models\User;
 use Psy\Command\WhereamiCommand;
 use Illuminate\Support\Str;
 
+use function Psy\debug;
+
 class ExpertController extends Controller
 {
     /**
@@ -161,15 +163,19 @@ class ExpertController extends Controller
 
     public function searchByConsultation($id)
     {
-        $experts = [];
-        $consultation_type = [];
-        if (!Consultation::all()->where('id', $id)->isEmpty()) {
-            $consultation_type = Consultation::where('id', $id)->first()->experts;
-        }
-        foreach ($consultation_type as $ex)
-            $experts[] = $ex->user;
+        $data = [];
 
-        return response()->json($experts, 200);
+        foreach (Consultation::find($id)->experts as $expert)
+            $data[] = [
+                'id' => $expert->user->id,
+                'username' => $expert->user->username,
+                'first_name' => $expert->user->first_name,
+                'last_name' => $expert->user->last_name,
+                'rate' => ($expert->number_of_ratings == 0) ? 0 : $expert->sum_of_ratings / $expert->number_of_ratings,
+                'hourly_rate' => $expert->hourly_rate
+            ];
+
+        return response()->json($data, 200);
     }
 
 
