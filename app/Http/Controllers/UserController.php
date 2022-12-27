@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{User, Favorite};
+use App\Models\{Consultation, User, Favorite};
 use Illuminate\Support\Facades\Auth;
 
 
@@ -120,6 +120,16 @@ class UserController extends Controller
         $user = User::find($id);
         return response()->json($user, 200);
     }
+
+    public function consultations()
+    {
+        return response()->json(
+            Consultation::all()->pluck('name'),
+            200
+        );
+    }
+
+
 
     public function favorites()
     {
