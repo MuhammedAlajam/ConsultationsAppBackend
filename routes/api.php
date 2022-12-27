@@ -22,6 +22,7 @@ Route::post('users/register', [UserController::class, 'register']);
 Route::post('experts/register', [ExpertController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 Route::get('consultations/all', [UserController::class, 'consultations']);
+Route::get('experts/searchByConsultation/{id}', [ExpertController::class, 'searchByConsultation']);
 
 //Protected Routes
 
@@ -36,6 +37,5 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('experts/all', [ExpertController::class, 'showAll']);
     Route::get('experts/show/{id}', [ExpertController::class, 'show']);
     Route::get('experts/search/{name}', [ExpertController::class, 'searchByName']);
-    Route::get('experts/searchByConsultation/{id}', [ExpertController::class, 'searchByConsultation']);
     Route::get('experts/getBookedTimes/{id}', [ExpertController::class, 'getBookedTimes']);
 });
