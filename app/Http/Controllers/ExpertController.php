@@ -147,7 +147,6 @@ class ExpertController extends Controller
         $users = [];
         foreach (User::where('role_type', 'expert')->get() as $expert) {
             if (Str::contains($expert->username, $name) || Str::contains($expert->first_name, $name) || Str::contains($expert->last_name, $name)) {
-                $ex = $expert;
                 $users[] = [
                     'id' => $expert->id,
                     'username' => $expert->username,
@@ -158,6 +157,10 @@ class ExpertController extends Controller
                 ];
             }
         }
+
+        debug($users);
+
+
         return response()->json($users, 200);
     }
 
