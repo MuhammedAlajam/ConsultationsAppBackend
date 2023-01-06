@@ -21,10 +21,6 @@ use Whoops\Run;
 Route::post('users/register', [UserController::class, 'register']);
 Route::post('experts/register', [ExpertController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
-Route::get('consultations/all', [UserController::class, 'consultations']);
-Route::get('experts/searchByConsultation/{id}', [ExpertController::class, 'searchByConsultation']);
-Route::get('experts/search/{name}', [ExpertController::class, 'searchByName']);
-Route::put('experts/unrate',[ExpertController::class,'unrate']);
 
 
 //Protected Routes
@@ -32,6 +28,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     
     Route::put('experts/rate', [ExpertController::class, 'rate']);
     Route::put('users/transfair', [UserController::class, 'transfairMoney']);
+    Route::get('consultations/all', [UserController::class, 'consultations']);
+    Route::get('experts/searchByConsultation/{id}', [ExpertController::class, 'searchByConsultation']);
+    Route::get('experts/search/{name}', [ExpertController::class, 'searchByName']);
+    Route::put('experts/unrate',[ExpertController::class,'unrate']);
     
     Route::put('users/flip_favorite',[UserController::class,'flip_favorite']);
     Route::get('favorites', [UserController::class, 'favorites']);
