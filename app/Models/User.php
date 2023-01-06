@@ -26,4 +26,8 @@ class User extends Model implements Authenticatable
     {
         return $this->hasMany(Favorite::class);
     }
+    public function bookedtimes()
+    {
+        return $this->hasMany(Bookedtime::class);
+    }
 }

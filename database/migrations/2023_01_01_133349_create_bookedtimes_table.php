@@ -13,10 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('consultation_expert', function (Blueprint $table) {
+        Schema::create('bookedtimes', function (Blueprint $table) {
             $table->id();
-            $table->integer('consultation_id')->unsigned();
+            $table->string('year');
+            $table->string('month');
+            $table->string('day');
+            $table->string('hour');
             $table->integer('expert_id')->unsigned();
+            $table->foreignId('user_id')->constrained();
         });
     }
 
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('consultation_expert');
+        Schema::dropIfExists('bookedtimes');
     }
 };

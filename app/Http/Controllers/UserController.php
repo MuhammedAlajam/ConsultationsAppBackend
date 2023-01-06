@@ -3,23 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{Consultation, User, Favorite};
+use App\Models\{Consultation, User, Favorite,Bookedtime};
 use Illuminate\Support\Facades\Auth;
-
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response     
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    
     public function register(Request $request)
     {
         $request->validate([
@@ -109,12 +99,7 @@ class UserController extends Controller
             'token' => $user->createToken($user->username)->plainTextToken
         ], 200);
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+  
     public function show($id)
     {
         $user = User::find($id);
@@ -149,13 +134,34 @@ class UserController extends Controller
         }
         return response()->json($experts, 200);
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
+    public function addFavorite(Request $request)
+    {
+        $user = User::find($request->input('user_id'));
+        $favorite = Favorite::create([
+            'user_id' => $request->input('user_id'),
+            'fav_id' => $request->input('fav_id')
+        ]);
+        return response()->json([], 200);
+    }
+    
+    public function flip_favorite(Request $request)
+    {
+        $user = User::find($request->input('user_id'));
+        $fav_id = $request->input('fav_id');
+        if($user->favorites->where('fav_id',$fav_id)->first() == null)
+        {
+            Favorite::create([
+                'user_id' => $user->id,
+                'fav_id' => $fav_id
+            ]);
+        }
+        else 
+        {
+            Favorite::destroy(Favorite::where('user_id',$user->id)->where('fav_id',$fav_id)->pluck('id'));
+        }
+        return response()->json([],200);
+    }
     public function transfairMoney(Request $request)
     {
         $transfair = $request->input('transfair');
@@ -170,22 +176,25 @@ class UserController extends Controller
         return response()->json([], 200);
     }
 
-    public function addFavorite(Request $request)
+    public function getUserBookedTimes($id)
     {
-        $user = User::find($request->input('user_id'));
-        $favorite = Favorite::create([
-            'user_id' => $request->input('user_id'),
-            'fav_id' => $request->input('fav_id')
-        ]);
-        return response()->json([], 200);
+        $user_id = $id;
+        $dates = User::find($user_id)->bookedtimes;
+        $data = [];
+        foreach($dates as $date)
+        {
+            $d = Carbon::createFromFormat('d/m/Y',$date->day.'/'.$date->month.'/'.$date->year)->format('d/m/Y');
+            $data[] =[
+                'id' => $date->id,
+                'date' => $d,
+                'hour' => Carbon::createFromFormat('H',$date->hour)->format('H'),
+                'expert_first_name' => User::find($date->expert_id)->first_name,
+                'expert_last_name' => User::find($date->expert_id)->last_name,
+                'expert_id' => $date->expert_id,
+            ];
+        }
+        return response()->json($data,200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         return User::destroy($id);

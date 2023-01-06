@@ -4,17 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Sanctum\HasApiTokens;
 
-
-class Consultation extends Model
+class Bookedtime extends Model
 {
-    use HasApiTokens,HasFactory;
+    use HasFactory;
     public $timestamps = false;
     protected $guarded = [];
-    
-    public function experts()
+
+    public function user()
     {
-        return $this->belongsToMany(Expert::class);
+        return $this->belongsTo(User::class);
     }
 }

@@ -20,6 +20,11 @@ class Expert extends Model
 
     public function consultations()
     {
-        return $this->belongsToMany(Consultation::class, 'consultation_expert');
+        return $this->belongsToMany(Consultation::class);
+    }
+
+    public function availabletimes()
+    {
+        return $this->hasMany(Availabletime::class);
     }
 }
