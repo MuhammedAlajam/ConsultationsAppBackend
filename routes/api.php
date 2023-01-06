@@ -24,24 +24,24 @@ Route::post('login', [UserController::class, 'login']);
 Route::get('consultations/all', [UserController::class, 'consultations']);
 Route::get('experts/searchByConsultation/{id}', [ExpertController::class, 'searchByConsultation']);
 Route::get('experts/search/{name}', [ExpertController::class, 'searchByName']);
-Route::put('users/flip_favorite',[UserController::class,'flip_favorite']);
 Route::put('experts/unrate',[ExpertController::class,'unrate']);
 
 
-Route::post('experts/setAvailableTimes',[ExpertController::class,'setAvailableTimes']);
-Route::get('experts/getAvailableTimes',[ExpertController::class,'getAvailableTimes']);
-Route::post('experts/book',[ExpertController::class,'book']);
-Route::get('users/getUserBookedTimes/{id}',[UserController::class,'getUserBookedTimes']);
-Route::get('experts/getExpertBookedTimes/{id}',[ExpertController::class,'getExpertBookedTimes']);
 //Protected Routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
-
+    
     Route::put('experts/rate', [ExpertController::class, 'rate']);
     Route::put('users/transfair', [UserController::class, 'transfairMoney']);
-
+    
+    Route::put('users/flip_favorite',[UserController::class,'flip_favorite']);
     Route::get('favorites', [UserController::class, 'favorites']);
     Route::post('users/addFavorite', [UserController::class,  'addFavorite']);
-
+    
+    Route::post('experts/book',[ExpertController::class,'book']);
+    Route::post('experts/setAvailableTimes',[ExpertController::class,'setAvailableTimes']);
+    Route::get('experts/getAvailableTimes',[ExpertController::class,'getAvailableTimes']);
+    Route::get('users/getUserBookedTimes',[UserController::class,'getUserBookedTimes']);
+    Route::get('experts/getExpertBookedTimes',[ExpertController::class,'getExpertBookedTimes']);
     Route::get('experts/all', [ExpertController::class, 'showAll']);
     Route::get('experts/show/{id}', [ExpertController::class, 'show']);
     Route::get('experts/getBookedTimes/{id}', [ExpertController::class, 'getBookedTimes']);

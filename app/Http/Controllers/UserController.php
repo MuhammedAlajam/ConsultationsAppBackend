@@ -147,7 +147,8 @@ class UserController extends Controller
     
     public function flip_favorite(Request $request)
     {
-        $user = User::find($request->input('user_id'));
+        $id = Auth::user()->id;
+        $user = User::find($id);
         $fav_id = $request->input('fav_id');
         if($user->favorites->where('fav_id',$fav_id)->first() == null)
         {
@@ -176,9 +177,9 @@ class UserController extends Controller
         return response()->json([], 200);
     }
 
-    public function getUserBookedTimes($id)
+    public function getUserBookedTimes()
     {
-        $user_id = $id;
+        $user_id = Auth::user()->id;
         $dates = User::find($user_id)->bookedtimes;
         $data = [];
         foreach($dates as $date)

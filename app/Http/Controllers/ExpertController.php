@@ -218,7 +218,7 @@ class ExpertController extends Controller
 
         string $day like sunday
 
-        int $expert_id
+        token
 
         array of int $hours
     */
@@ -229,7 +229,7 @@ class ExpertController extends Controller
        // return  Carbon::createFromFormat('h','6')->format('h');
         $day = $request->input('day');
         $hours = json_decode($request->input('hours'));
-        $expert_id =$request->input('expert_id');
+        $expert_id = Auth::user()->id;
         while((int)$date->format('Y')<2025)
         {
             if($date->format('l') == $day)
@@ -283,7 +283,7 @@ class ExpertController extends Controller
     public function book(Request $request)
     {
         $expert_id = $request->input('expert_id');
-        $user_id =$request->input('user_id');
+        $user_id =Auth::user()->id;
         if(User::find($user_id)->wallet < User::find($expert_id)->expert->hourly_rate)
         {
             return response()->json([],403);
@@ -312,9 +312,9 @@ class ExpertController extends Controller
         return response()->json([],200);
     }
    
-    public function getExpertBookedTimes($id)
+    public function getExpertBookedTimes()
     {
-        $expert_id = $id;
+        $expert_id = Auth::user()->id;
         $dates = Bookedtime::where('expert_id',$expert_id)->get();
         $data = [];
         foreach($dates as $date)
