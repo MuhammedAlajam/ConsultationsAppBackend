@@ -146,9 +146,6 @@ class ExpertController extends Controller
             }
         }
 
-        debug($users);
-
-
         return response()->json($users, 200);
     }
 
@@ -169,20 +166,24 @@ class ExpertController extends Controller
         return response()->json($data, 200);
     }
 
-    public function filterByConsultation($name)
+    public function filterByConsultation($consultation_id, $name)
     {
-        $data = [];
-        foreach (Consultation::where('name', $name)->first()->experts as $expert) {
-            $data[] = [
-                'id' => $expert->user->id,
-                'username' => $expert->user->username,
-                'first_name' => $expert->user->first_name,
-                'last_name' => $expert->user->last_name,
-                'rate' => $expert->rate,
-                'hourly_rate' => $expert->hourly_rate
-            ];
+        $users = [];
+        foreach (Consultation::find($consultation_id)->experts as $expertInfo) {
+            $expert = $expertInfo->user;
+
+            if (Str::contains($expert->username, $name) || Str::contains($expert->first_name, $name) || Str::contains($expert->last_name, $name)) {
+                $users[] = [
+                    'id' => $expert->id,
+                    'username' => $expert->username,
+                    'first_name' => $expert->first_name,
+                    'last_name' => $expert->last_name,
+                    'rate' => $expert->expert->rate,
+                    'hourly_rate' => $expert->expert->hourly_rate
+                ];
+            }
         }
-        return response()->json($data, 200);
+        return response()->json($users, 200);
     }
 
 

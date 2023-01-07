@@ -45,5 +45,5 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('experts/all', [ExpertController::class, 'showAll']);
     Route::get('experts/show/{id}', [ExpertController::class, 'show']);
-    Route::get('experts/search/filterByConsultation/{name}', [ExpertController::class, 'filterByConsultation']);
+    Route::get('experts/search/filterByConsultation/{consultation_id}/{name}', [ExpertController::class, 'filterByConsultation']);
 });
