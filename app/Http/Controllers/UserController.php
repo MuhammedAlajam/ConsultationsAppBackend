@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{Consultation, User, Favorite,Bookedtime};
+use App\Models\{Consultation, User, Favorite, Bookedtime};
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Error;
 
 class UserController extends Controller
 {
-    
+
     public function register(Request $request)
     {
         $request->validate([
@@ -99,7 +100,7 @@ class UserController extends Controller
             'token' => $user->createToken($user->username)->plainTextToken
         ], 200);
     }
-  
+
     public function show($id)
     {
         $user = User::find($id);
@@ -113,8 +114,6 @@ class UserController extends Controller
             200
         );
     }
-
-
 
     public function favorites()
     {
@@ -134,34 +133,21 @@ class UserController extends Controller
         }
         return response()->json($experts, 200);
     }
-   
-    public function addFavorite(Request $request)
-    {
-        $user = User::find($request->input('user_id'));
-        $favorite = Favorite::create([
-            'user_id' => $request->input('user_id'),
-            'fav_id' => $request->input('fav_id')
-        ]);
-        return response()->json([], 200);
-    }
-    
+
     public function flip_favorite(Request $request)
     {
         $id = Auth::user()->id;
         $user = User::find($id);
         $fav_id = $request->input('fav_id');
-        if($user->favorites->where('fav_id',$fav_id)->first() == null)
-        {
+        if ($user->favorites->where('fav_id', $fav_id)->first() == null) {
             Favorite::create([
                 'user_id' => $user->id,
                 'fav_id' => $fav_id
             ]);
+        } else {
+            Favorite::destroy(Favorite::where('user_id', $user->id)->where('fav_id', $fav_id)->pluck('id'));
         }
-        else 
-        {
-            Favorite::destroy(Favorite::where('user_id',$user->id)->where('fav_id',$fav_id)->pluck('id'));
-        }
-        return response()->json([],200);
+        return response()->json([], 200);
     }
     public function transfairMoney(Request $request)
     {
@@ -179,22 +165,23 @@ class UserController extends Controller
 
     public function getUserBookedTimes()
     {
+        error_log('dalfkdjf;lkajsdf');
         $user_id = Auth::user()->id;
+        error_log($user_id);
         $dates = User::find($user_id)->bookedtimes;
         $data = [];
-        foreach($dates as $date)
-        {
-            $d = Carbon::createFromFormat('d/m/Y',$date->day.'/'.$date->month.'/'.$date->year)->format('d/m/Y');
-            $data[] =[
+        foreach ($dates as $date) {
+            $d = Carbon::createFromFormat('d/m/Y', $date->day . '/' . $date->month . '/' . $date->year)->format('d/m/Y');
+            $data[] = [
                 'id' => $date->id,
                 'date' => $d,
-                'hour' => Carbon::createFromFormat('H',$date->hour)->format('H'),
+                'hour' => Carbon::createFromFormat('H', $date->hour)->format('H'),
                 'expert_first_name' => User::find($date->expert_id)->first_name,
                 'expert_last_name' => User::find($date->expert_id)->last_name,
                 'expert_id' => $date->expert_id,
             ];
         }
-        return response()->json($data,200);
+        return response()->json($data, 200);
     }
     public function destroy($id)
     {

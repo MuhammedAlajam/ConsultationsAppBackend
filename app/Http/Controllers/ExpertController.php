@@ -12,6 +12,9 @@ use Psy\Command\WhereamiCommand;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Error;
+use Illuminate\Support\Facades\Log;
+
 use function Psy\debug;
 
 class ExpertController extends Controller
@@ -106,9 +109,9 @@ class ExpertController extends Controller
     public function show($id)
     {
         $user = User::where('id', $id)->get()->first();
-        $get_favorite = User::where('id',Auth::user()->id)->first()->favorites->where('fav_id',$id)->first();
+        $get_favorite = User::where('id', Auth::user()->id)->first()->favorites->where('fav_id', $id)->first();
         $is_favorite = true;
-        if($get_favorite == null)
+        if ($get_favorite == null)
             $is_favorite = false;
         $expert = [
             'id' => $user->id,
@@ -169,8 +172,7 @@ class ExpertController extends Controller
     public function filterByConsultation($name)
     {
         $data = [];
-        foreach(Consultation::where('name',$name)->first()->experts as $expert)
-        {
+        foreach (Consultation::where('name', $name)->first()->experts as $expert) {
             $data[] = [
                 'id' => $expert->user->id,
                 'username' => $expert->user->username,
@@ -180,38 +182,18 @@ class ExpertController extends Controller
                 'hourly_rate' => $expert->hourly_rate
             ];
         }
-        return response()->json($data,200);
+        return response()->json($data, 200);
     }
 
-    public function getBookedTimes($id)
-    {
-        return User::find($id)->expert->booked_times;
-    }
 
-    public function rate(Request $request)
+    public function rate(Request $request, $id)
     {
-        $user = User::find($request->id);
+        $user = User::find($id);
         $user->expert->number_of_ratings++;
         $user->expert->sum_of_ratings += $request->input('new_rate');
         $user->expert->rate = $user->expert->sum_of_ratings / $user->expert->number_of_ratings;
         $user->expert->save();
         return response()->json([], 200);
-    }
-    public function unrate(Request $request)
-    {
-        $user = User::find($request->id);
-        $user->expert->number_of_ratings--;
-        $user->expert->sum_of_ratings -= $request->input('old_rate');
-        if($user->expert->number_of_ratings == 0)
-        {
-            $user->expert->rate = 0;
-        }
-        else
-        {
-            $user->expert->rate = $user->expert->sum_of_ratings / $user->expert->number_of_ratings;
-        }
-        $user->expert->save();
-        return response()->json([],200);
     }
     /* 
         @params
@@ -225,29 +207,26 @@ class ExpertController extends Controller
     public function setAvailableTimes(Request $request)
     {
         $start_date = '1/1/2023';
-        $date = Carbon::createFromFormat('d/m/Y',$start_date);
-       // return  Carbon::createFromFormat('h','6')->format('h');
+        $date = Carbon::createFromFormat('d/m/Y', $start_date);
+        // return  Carbon::createFromFormat('h','6')->format('h');
         $day = $request->input('day');
         $hours = json_decode($request->input('hours'));
         $expert_id = Auth::user()->id;
-        while((int)$date->format('Y')<2025)
-        {
-            if($date->format('l') == $day)
-            {
-                foreach($hours as $hour)
-                {
+        while ((int)$date->format('Y') < 2025) {
+            if ($date->format('l') == $day) {
+                foreach ($hours as $hour) {
                     Availabletime::create([
-                    'year' => $date->format('Y'),
-                    'month' => $date->format('m'),
-                    'day' => $date->format('d'),
-                    'hour' => Carbon::createFromFormat('H',$hour)->format('H'),
-                    'expert_id' => $expert_id
+                        'year' => $date->format('Y'),
+                        'month' => $date->format('m'),
+                        'day' => $date->format('d'),
+                        'hour' => Carbon::createFromFormat('H', $hour)->format('H'),
+                        'expert_id' => $expert_id
                     ]);
                 }
             }
             $date->addDays(1);
         }
-        return response()->json([],200);
+        return response()->json([], 200);
     }
     /* 
         @params
@@ -260,15 +239,20 @@ class ExpertController extends Controller
 
         array of hours
     */
-    public function getAvailableTimes(Request $request)
+    public function getAvailableTimes($expert_id, $s_date)
     {
-        $expert_id = $request->input('expert_id');
-        $date = Carbon::createFromFormat('d/m/Y',$request->input('date'));
+        error_log($s_date);
+        $date = Carbon::createFromFormat('d-m-Y', $s_date);
 
-        $data = User::where('id',$expert_id)->first()->expert->availabletimes->
-        where('year',$date->format('Y'))->where('month',$date->format('m'))->where('day',$date->format('d'))->pluck('hour');
 
-        return response()->json([$data],200);
+        error_log($date);
+        error_log($date->format('d'));
+        error_log($date->format('m'));
+        error_log($date->format('Y'));
+
+        $data = User::where('id', $expert_id)->first()->expert->availabletimes->where('year', $date->format('Y'))->where('month', $date->format('m'))->where('day', $date->format('d'))->pluck('hour');
+        error_log($data);
+        return response()->json([$data], 200);
     }
     /* 
         @params
@@ -282,11 +266,12 @@ class ExpertController extends Controller
     */
     public function book(Request $request)
     {
+        error_log('dddddjdjdj');
+
         $expert_id = $request->input('expert_id');
-        $user_id =Auth::user()->id;
-        if(User::find($user_id)->wallet < User::find($expert_id)->expert->hourly_rate)
-        {
-            return response()->json([],403);
+        $user_id = Auth::user()->id;
+        if (User::find($user_id)->wallet < User::find($expert_id)->expert->hourly_rate) {
+            return response()->json([], 403);
         }
         $first =  User::find($user_id);
         $second =  User::find($expert_id);
@@ -295,41 +280,44 @@ class ExpertController extends Controller
         $second->wallet +=  $transfair;
         $first->save();
         $second->save();
-        $date = Carbon::createFromFormat('d/m/Y',$request->input('date'));
+        $date = Carbon::createFromFormat('d-m-Y', $request->input('date'));
         $hour = $request->input('hour');
-        $data = User::where('id',$expert_id)->first()->expert->availabletimes->
-        where('year',$date->format('Y'))->where('month',$date->format('m'))->where('day',$date->format('d'))
-        ->where('hour',Carbon::createFromFormat('H',$hour)->format('H'))->first();
+        $data = User::where('id', $expert_id)->first()->expert->availabletimes->where('year', $date->format('Y'))->where('month', $date->format('m'))->where('day', $date->format('d'))
+            ->where('hour', Carbon::createFromFormat('H', $hour)->format('H'))->first();
         Bookedtime::create([
             'year' => $data->year,
-            'month' =>$data->month,
-            'day' =>$data->day,
-            'hour' =>$data->hour,
-            'expert_id' =>$expert_id,
-            'user_id' =>$user_id
+            'month' => $data->month,
+            'day' => $data->day,
+            'hour' => $data->hour,
+            'expert_id' => $expert_id,
+            'user_id' => $user_id
         ]);
+
         Availabletime::destroy($data->id);
-        return response()->json([],200);
+
+        error_log('done ? ');
+        return response()->json([
+            'wallet' => $first->wallet,
+        ], 200);
     }
-   
+
     public function getExpertBookedTimes()
     {
         $expert_id = Auth::user()->id;
-        $dates = Bookedtime::where('expert_id',$expert_id)->get();
+        $dates = Bookedtime::where('expert_id', $expert_id)->get();
         $data = [];
-        foreach($dates as $date)
-        {
-            $d = Carbon::createFromFormat('d/m/Y',$date->day.'/'.$date->month.'/'.$date->year)->format('d/m/Y');
-            $data[] =[
+        foreach ($dates as $date) {
+            $d = Carbon::createFromFormat('d/m/Y', $date->day . '/' . $date->month . '/' . $date->year)->format('d/m/Y');
+            $data[] = [
                 'id' => $date->id,
                 'date' => $d,
-                'hour' => Carbon::createFromFormat('H',$date->hour)->format('H'),
+                'hour' => Carbon::createFromFormat('H', $date->hour)->format('H'),
                 'user_first_name' => User::find($date->user_id)->first_name,
                 'user_last_name' => User::find($date->user_id)->last_name,
                 'user_id' => $date->user_id,
             ];
         }
-        return response()->json($data,200);
+        return response()->json($data, 200);
     }
     public function destroy($id)
     {
