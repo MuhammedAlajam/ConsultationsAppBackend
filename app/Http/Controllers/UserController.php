@@ -183,6 +183,36 @@ class UserController extends Controller
         }
         return response()->json($data, 200);
     }
+
+    public function setPhoto(Request $request)
+    {
+        $image_name = $request->file('photo')->getClientOriginalName();
+        $path = $request->file('photo')->storeAs('users',$image_name,'public');
+        $user_id = Auth::user()->id;
+        User::find($user_id)->update([
+            'profile_photo' => $path
+        ]);
+        return response()->json([],200);
+    }
+
+    public function getPhoto()
+    {
+        $user_id = Auth::user()->id;
+        $image_name = User::find($user_id)->profile_photo;
+        return response()->file(public_path('storage/'.$image_name));
+    }
+
+    public function getPhotoById($id)
+    {
+        $image_name = User::find($id)->profile_photo;
+        return response()->file(public_path('storage/'.$image_name));
+    }
+    public function wallet()
+    {
+        $user_id = Auth::user()->id;
+        $wallet = User::find($user_id)->wallet;
+        return response()->json($wallet,200);
+    }
     public function destroy($id)
     {
         return User::destroy($id);
